@@ -58,8 +58,23 @@
     html[data-theme='dark'] .markdown-section h1,
     html[data-theme='dark'] .markdown-section h2,
     html[data-theme='dark'] .markdown-section h3,
-    html[data-theme='dark'] .markdown-section h4 {
-      color: var(--text-color);
+    html[data-theme='dark'] .markdown-section h4,
+    html[data-theme='dark'] .markdown-section h5,
+    html[data-theme='dark'] .markdown-section h6 {
+      color: var(--text-color) !important;
+    }
+
+    html[data-theme='dark'] .markdown-section h1 a,
+    html[data-theme='dark'] .markdown-section h2 a,
+    html[data-theme='dark'] .markdown-section h3 a,
+    html[data-theme='dark'] .markdown-section h4 a,
+    html[data-theme='dark'] .markdown-section h5 a,
+    html[data-theme='dark'] .markdown-section h6 a {
+      color: var(--text-color) !important;
+    }
+
+    html[data-theme='dark'] .markdown-section h2 {
+      border-bottom-color: var(--border-color) !important;
     }
 
     html[data-theme='dark'] .markdown-section strong,
