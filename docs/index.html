@@ -6,12 +6,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="个人学习笔记与技术分享">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <!-- CDN 预连接 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- 主题样式 -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
   <!-- 代码高亮主题 -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
-  <!-- 图片放大样式 -->
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/style.min.css">
   <style>
     /* 暗色主题变量 */
     :root {
@@ -55,13 +55,14 @@
       color: var(--text-color);
     }
 
-    html[data-theme='dark'] .markdown-section h1,
-    html[data-theme='dark'] .markdown-section h2,
-    html[data-theme='dark'] .markdown-section h3,
-    html[data-theme='dark'] .markdown-section h4,
-    html[data-theme='dark'] .markdown-section h5,
-    html[data-theme='dark'] .markdown-section h6 {
-      color: var(--text-color) !important;
+    /* 暗色模式标题 */
+    html[data-theme='dark'] h1,
+    html[data-theme='dark'] h2,
+    html[data-theme='dark'] h3,
+    html[data-theme='dark'] h4,
+    html[data-theme='dark'] h5,
+    html[data-theme='dark'] h6 {
+      color: #e6edf3 !important;
     }
 
     html[data-theme='dark'] .markdown-section h1 a,
@@ -70,7 +71,7 @@
     html[data-theme='dark'] .markdown-section h4 a,
     html[data-theme='dark'] .markdown-section h5 a,
     html[data-theme='dark'] .markdown-section h6 a {
-      color: var(--text-color) !important;
+      color: #e6edf3 !important;
     }
 
     html[data-theme='dark'] .markdown-section h2 {
@@ -104,6 +105,73 @@
     html[data-theme='dark'] .search .matching-post {
       background-color: var(--sidebar-bg);
       border-color: var(--border-color);
+    }
+
+    html[data-theme='dark'] .search .matching-post p {
+      color: var(--text-color);
+    }
+
+    html[data-theme='dark'] .search .search-keyword {
+      color: var(--theme-color);
+    }
+
+    /* 暗色模式 - 主内容区背景 */
+    html[data-theme='dark'] .content,
+    html[data-theme='dark'] main,
+    html[data-theme='dark'] #main {
+      background-color: var(--bg-color);
+    }
+
+    /* 暗色模式 - 表格 */
+    html[data-theme='dark'] .markdown-section table {
+      border-collapse: collapse;
+      display: table;
+    }
+
+    html[data-theme='dark'] .markdown-section table th,
+    html[data-theme='dark'] .markdown-section table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      color: var(--text-color);
+    }
+
+    html[data-theme='dark'] .markdown-section table th {
+      background-color: var(--sidebar-bg);
+      color: #e6edf3;
+      font-weight: 600;
+    }
+
+    html[data-theme='dark'] .markdown-section table tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* 暗色模式 - 引用块 */
+    html[data-theme='dark'] .markdown-section blockquote {
+      border-left: 4px solid var(--theme-color);
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #8b949e;
+    }
+
+    html[data-theme='dark'] .markdown-section blockquote p {
+      color: #8b949e;
+    }
+
+    /* 暗色模式 - 水平线 */
+    html[data-theme='dark'] .markdown-section hr {
+      border-color: var(--border-color);
+      background-color: var(--border-color);
+    }
+
+    /* 暗色模式 - 列表 */
+    html[data-theme='dark'] .markdown-section ul,
+    html[data-theme='dark'] .markdown-section ol,
+    html[data-theme='dark'] .markdown-section li {
+      color: var(--text-color);
+    }
+
+    /* 暗色模式 - 图片背景（针对透明图片） */
+    html[data-theme='dark'] .markdown-section img {
+      background-color: transparent;
     }
 
     /* 主题切换按钮 */
@@ -180,6 +248,23 @@
     .docsify-copy-code-button {
       font-size: 12px !important;
     }
+
+    /* 隐藏分页导航中的首页链接 */
+    .pagination-item a[href="#/"],
+    .pagination-item a[href="#/?id=_1"],
+    .pagination-item a[href="/"],
+    .pagination-item a[href="#/README"] {
+      display: none;
+    }
+
+    /* 字数统计样式 */
+    .docsify-count {
+      color: #6a737d;
+    }
+
+    html[data-theme='dark'] .docsify-count {
+      color: #8b949e;
+    }
   </style>
 </head>
 <body>
@@ -207,11 +292,28 @@
       btn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 
-    // 初始化主题
+    // 初始化主题（优先用户保存的主题，其次跟随系统）
     (function() {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      updateThemeButton(savedTheme);
+      const savedTheme = localStorage.getItem('theme');
+      let theme;
+      if (savedTheme) {
+        theme = savedTheme;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        theme = 'dark';
+      } else {
+        theme = 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+      updateThemeButton(theme);
+
+      // 监听系统主题变化（仅当用户未手动设置时生效）
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem('theme')) {
+          const newTheme = e.matches ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          updateThemeButton(newTheme);
+        }
+      });
     })();
 
     // 返回顶部功能
@@ -249,7 +351,6 @@
       count: {
         countable: true,
         fontsize: '0.9em',
-        color: 'rgb(90,90,90)',
         language: 'chinese'
       },
 
