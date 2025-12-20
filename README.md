@@ -4,22 +4,7 @@
 
 ## 在线访问
 
-部署后将在 GitHub Pages 上访问：`https://你的用户名.github.io/仓库名`
-
-## 本地预览
-
-```bash
-# 安装 docsify-cli（如果没有安装）
-npm i docsify-cli -g
-
-# 启动本地服务器
-docsify serve
-
-# 或者使用 Python 简单服务器
-python -m http.server 3000
-```
-
-然后访问 http://localhost:3000
+部署后将在 GitHub Pages 上访问：`https://waylon-john-777.github.io/my-blog/`
 
 ## 添加新文章
 

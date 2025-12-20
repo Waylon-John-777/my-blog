@@ -2,8 +2,6 @@
 
 *本文撰写于 2025 年 12 月 11 日，最后更新于 2025 年 12 月 15 日*
 
-*原论文链接：<https://arxiv.org/abs/2512.01374>*
-
 ## 强化学习目标函数：sequence-level vs token-level
 
 将自回归 LLM 参数化为策略 $\pi_\theta$，并用 $x$ 表示采样自数据集 $\mathcal D$ 的 prompt 输入. LLM 生成回复 $y$ 的概率可被记为：
@@ -71,3 +69,6 @@ $$\dfrac{\pi_\theta (y_t | x, y_{<t}, \color{blue}{e_t^{\pi_{old}}})}{\mu_{\thet
 $$\dfrac{\pi_\theta (y_t | x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}{\mu_{\theta_{old}}(y_t|x, y_{<t}, e_t^{\mu_{old}})} = \underbrace{\dfrac{\pi_{\theta_{old}} (y_t | x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}{\mu_{\theta_{old}}(y_t|x, y_{<t}, e_t^{\mu_{old}})}}_{\text {numerical differences} \, \downarrow} \cdot \underbrace{\dfrac{\pi_\theta (y_t | x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}{\pi_{\theta_{old}}(y_t|x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}}_{\text {policy staleness} \, \downarrow}$$
 
 值得注意的是，尽管路由重演机制缓和了 MoE 中被放大的训推差异与策略滞后问题，**它不可避免的在优化目标中引入了额外的偏差：每个 token $y_t$ 所对应的专家 $e^\pi_t$ 本应由模型自主决定，而该机制对其进行了人为干预**.
+
+## 参考文献
+[1] **<https://arxiv.org/abs/2512.01374>**
