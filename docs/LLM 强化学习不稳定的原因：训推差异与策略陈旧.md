@@ -6,7 +6,7 @@
 
 将自回归 LLM 参数化为策略 $\pi_\theta$，并用 $x$ 表示采样自数据集 $\mathcal D$ 的 prompt 输入. LLM 生成回复 $y$ 的概率可被记为：
 
-$$\pi_\theta (y | x) = \prod_{t=1}^T \pi_\theta (y_t | x, y_{<t}) $$
+$$\pi_\theta (y | x) = \prod_{t=1}^T \pi_\theta (y_t | x, y_{<t})$$
 
 在 LLM 的强化学习中，语言的上下文特性决定了需为整条回复 $y$ 设置单一标量奖励 $R(x, y)$. 为使奖励最大化，我们需对如下函数做极值优化：
 
