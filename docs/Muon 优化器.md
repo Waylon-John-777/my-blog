@@ -39,7 +39,7 @@ def newtonschulz5(M, steps=5, eps=1e-7):
 
 Muon 旨在对给定矩阵 $M$，寻找半正交矩阵以使：
 
-$$\operatorname*{arg\,min}_{O} \|O - M\|_F, \quad \text{either} \, O^\top O = I \, \text{or} \, O O^\top = I$$
+$$\operatorname*{arg\,min}_{O} \|O - M\|_F, \quad \text{either} \, O^\top O = I \, \text{or} \, O O^\top = I \tag 1$$
 
 数学上可证明满足如上条件的半正交阵 $O = UV^\top$，其中 $U, V$ 分别为 $M$ 的左右奇异向量矩阵.
 ### NewtonSchulz 迭代到底在做什么
@@ -93,5 +93,7 @@ $$X = U \, \Phi^k(\Sigma) \, V^\top \tag 3$$
 ## KIMI 的改进
 
 ## 参考文献
+
 [1] <https://kellerjordan.github.io/posts/muon/>
+
 [2] <https://arxiv.org/pdf/2502.16982>
