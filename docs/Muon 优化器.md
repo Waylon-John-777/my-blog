@@ -39,7 +39,7 @@ def newtonschulz5(M, steps=5, eps=1e-7):
 
 Muon 旨在对给定矩阵 $M$，寻找 F 范数意义下与其最接近的半正交矩阵：
 
-$$\operatorname*{arg\,min}_{O} \|O - M\|_F, \quad \text{either} \, O^\top O = I \, \text{or} \, O O^\top = I$$
+$$\operatorname*{arg\,min}_{O} \|O - M\|_F, \quad \text{either} \, O^\top O = I \, \text{or} \, O O^\top = I \tag 1$$
 
 数学上可证明满足如上条件的半正交阵 $O = UV^\top$，其中 $U, V$ 分别为 $M$ 的左右奇异向量矩阵.
 ### NewtonSchulz 迭代到底在做什么
@@ -91,6 +91,15 @@ $$X = U \, \Phi^k(\Sigma) \, V^\top \tag 3$$
 假设神经网络参数对应的是一个线性层 $W \in \mathbb R^{n \times m}$，输入张量的形状为 $X \in \mathbb R^{b \times n}$，则一次正常训练步骤（前向与反向）的基准 FLOPs 数为 $6bmn$. 故在迭代次数为 $T$ 的设置下，Muon 的额外开销为 $\dfrac{mT}{b}$. 在 NanoGPT speedrunning 和 Llama 405B 训练的场景下，代入具体数据可得 Muon 的额外 FLOPs 占比分别为 0.7% 与 0.5% [[1]](<https://kellerjordan.github.io/posts/muon/>).
 
 ## 模型扩展后的表现：KIMI 的改进
+
+对于形如 $[A, B]$ 的满秩矩阵，易证 MUON 更新量的 RMS 值为 $\sqrt{\dfrac{1}{\max (A, B)}}$，这带来了两个问题 [[2]](<https://arxiv.org/pdf/2502.16982>)：
+
+1. 当 $\max (A, B)$ 较大，更新量过小，从而限制了模型的表示能力并导致次优性能；
+2. 当 $\max (A, B)$ 较小，更新量过大，这会导致训练的不稳定性；
+
+AdamW 常用以与 Muon 结合以更新如 RMSNorm, LM head 和 embedding 等非矩阵参数，为使超参数如学习率 $\eta$，权重衰减 $\lambda$ 在矩阵和非矩阵参数之间共享，KIMI 采用如下调整**将 MUON 的更新 RMS 匹配为与 AdamW 相似的 RMS**（经验观察 AdamW 的更新均方根值通常在 0.2 到 0.4 之间）：
+
+$$\mathbf W_t = \mathbf W_{t - 1} - \eta_t \left(0.2 \cdot \sqrt{\max(A, B)} \cdot \mathbf O_t + \lambda \mathbf W_{t - 1}\right) \tag 4$$
 
 ## 参考文献
 
