@@ -71,4 +71,4 @@ $$\dfrac{\pi_\theta (y_t | x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}{\mu_{\thet
 值得注意的是，尽管路由重演机制缓和了 MoE 中被放大的训推差异与策略滞后问题，**它不可避免的在优化目标中引入了额外的偏差：每个 token $y_t$ 所对应的专家 $e^\pi_t$ 本应由模型自主决定，而该机制对其进行了人为干预**.
 
 ## 参考文献
-[1] **<https://arxiv.org/abs/2512.01374>**
+[[1] Stabilizing Reinforcement Learning with LLMs: Formulation and Practices](<https://arxiv.org/abs/2512.01374>)
