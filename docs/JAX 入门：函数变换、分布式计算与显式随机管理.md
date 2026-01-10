@@ -106,6 +106,55 @@ def test_fn(x):
 ### jax.grad
 > ```jax.grad```：JAX 的自动微分，用以计算函数的梯度
 
+多元函数 $f: \mathbb R^n \rightarrow \mathbb R$ 可在扰动点附近做二阶展开：
+
+$$f(\mathbf x + \mathbf {dx}) \approx f(\mathbf x) + \mathbf {dx} \cdot \nabla f(\mathbf x) + \frac{1}{2} \mathbf {dx} \mathbf {dx} : \nabla \nabla f(\mathbf x)\tag 1$$
+
+```python
+def f(t):
+    x, y, z = t
+    return jnp.sin(x) * jnp.cos(y) * z
+    
+def df(t):
+    x, y, z = t
+    return jnp.array(
+        [
+            jnp.cos(x) * jnp.cos(y) * z,
+            -jnp.sin(x) * jnp.sin(y) * z,
+            jnp.sin(x) * jnp.cos(y)
+        ]
+    )
+    
+def ddf(t):
+    x, y, z = t
+    return jnp.array(
+        [
+            [-jnp.sin(x) * jnp.cos(y) * z, -jnp.cos(x) * jnp.sin(y) * z, jnp.cos(x) * jnp.cos(y)],
+            [-jnp.cos(x) * jnp.sin(y) * z, -jnp.sin(x) * jnp.cos(y) * z, -jnp.sin(x) * jnp.sin(y)],
+            [jnp.cos(x) * jnp.cos(y), -jnp.sin(x) * jnp.sin(y), 0]
+        ]
+    )
+```
+```python
+def all_close(a, b):
+    return jax.tree.map(
+    	partial(jnp.allclose, atol=1e-3, rtol=1e-3), a, b
+    )
+```
+```python
+t = jax.random.normal(jax.random.key(0), (3,))
+print(f"Check the first order derivatives: {all_close(df(t), jax.grad(f)(t))}")
+print(f"Check the second order derivatives: {all_close(ddf(t), jax.hessian(f)(t))}")
+```
+```text
+Check the first order derivatives: True
+Check the second order derivatives: True
+```
+对于多元向量函数 $g: \mathbb R^n \rightarrow \mathbb R^m$，我们可以使用 ```jax.jacobian``` 查看其雅可比矩阵. 此外，**JAX 的各种变换在遵循一定规则的情况下可以自由嵌套使用，这种可组合性是 JAX 区别于其它框架的重要特性**.
+
+### jax.vmap
+> ```jax.vmap```：自动将针对单个样本编写的函数向量化为批处理版本，无需手动编写循环或修改代码
+
 ## 分布式计算
 
 ## 显式随机管理
