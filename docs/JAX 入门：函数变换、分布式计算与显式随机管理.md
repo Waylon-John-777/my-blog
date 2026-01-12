@@ -91,16 +91,13 @@ def test_fn(x):
 ```
 ```python
 %timeit y = test_fn(x).block_until_ready()
-```
-```text
-556 ms ± 1.66 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-```
-```python
 %timeit y = jax.jit(test_fn)(x).block_until_ready()
 ```
 ```text
+556 ms ± 1.66 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 487 ms ± 2.28 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 ```
+
 其中 ```.block_until_ready()``` 用以确保异步执行完成，获得准确计时.
 
 ### jax.grad
@@ -150,11 +147,136 @@ print(f"Check the second order derivatives: {all_close(ddf(t), jax.hessian(f)(t)
 Check the first order derivatives: True
 Check the second order derivatives: True
 ```
-对于多元向量函数 $g: \mathbb R^n \rightarrow \mathbb R^m$，我们可以使用 ```jax.jacobian``` 查看其雅可比矩阵. 此外，**JAX 的各种变换在遵循一定规则的情况下可以自由嵌套使用，这种可组合性是 JAX 区别于其它框架的重要特性**.
+此外，对于多元向量函数 $g: \mathbb R^n \rightarrow \mathbb R^m$，我们可以使用 ```jax.jacobian``` 查看其雅可比矩阵. **JAX 的各种变换在遵循一定规则的情况下可以自由嵌套使用，这种可组合性是 JAX 区别于其它框架的重要特性**.
 
 ### jax.vmap
 > ```jax.vmap```：自动将针对单个样本编写的函数向量化为批处理版本，无需手动编写循环或修改代码
 
+假设我们需要计算余弦相似度
+
+```python
+# Vector version
+def cosine_simi(a, b):
+	return jnp.dot(a, b) / (jnp.linalg.norm(a) * jnp.linalg.norm(b))
+	
+# Loop version
+def loop_cosine_simi(a, b):
+	return jnp.array([cosine_simi(a, b) for a, b in zip(a, b)])
+	
+# Batch version
+def batch_cosine_simi(a, b):
+	return jnp.sum(a * b, axis=-1) / (jnp.linalg.norm(a, ord=2, axis=-1) * jnp.linalg.norm(b, ord=2, axis=-1))
+	
+# Prepare inputs
+a = jax.random.normal(jax.random.key(0), shape=(1000, 256))
+b = jax.random.normal(jax.random.key(1), shape=(1000, 256))
+```
+```python
+%timeit loop_cosine_simi(a, b).block_until_ready()
+%timeit batch_cosine_simi(a, b).block_until_ready()
+%timeit jax.vmap(cosine_simi)(a, b).block_until_ready()
+```
+```text
+40.3 ms ± 462 μs per loop (mean ± std. dev. of 7 runs, 1 loop each)
+149 μs ± 17.1 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
+485 μs ± 8.66 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
+```
+可见 ```batch_cosine_simi``` 与 ```jax.vmap(cosine_simi)``` 性能相当（均为 μs 量级），**但 ```jax.vmap``` 的价值在于让复杂操作变得简单可写.**
+
+除了上述提及的功能， JAX 中还存在：
+
+1. ```jax.pmap```：并行映射，跨多设备并行执行；
+2. ```jax.checkpoint```：梯度检查点，用时间换空间；
+3. …
+
+等诸多函数变换，这些变换在规则下可以任意组合，使用户以优雅的代码风格实现高效的计算速度.
+
 ## 分布式计算
+
+### 数据分片
+
+分布式计算的核心概念之一是数据分片，它描述了数据在可用设备之间的布局方式. **JAX 的数据类型——不可变的 ```jax.Array``` 数组结构——设计初衷就是面向分布式数据与计算**.
+
+每一个 ```jax.Array``` 都有一个关联的 ```jax.sharding.Sharding``` 对象，用来描述在全局数组中，每个设备应该负责哪一块数据. 当我们从零创建一个 ```jax.Array``` 时，也必须同时创建其对应的 ```Sharding```. 一般情况下，数组被划分在单一设备，使用 ```jax.device_put``` 可将数组重分片：
+
+```python
+arr = jnp.arange(32).reshape(4, 8)
+
+mesh = jax.make_mesh(axis_shapes=(2, 4), axis_names=("x", "y"))
+sharded_arr = jax.device_put(arr, NamedSharding(mesh, P("x", "y")))
+
+jax.debug.visualize_array_sharding(sharded_arr)
+```
+<div align="center">
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX4.png"><br>
+  <b>Fig 4. 检查张量在各设备上的切分情况</b>
+</div>
+
+### jax.shard_map
+
+JAX 的并行计算存在三种模式：
+
+1. 通过 ```jax.jit``` 实现的自动管理：编译器会自动选择最优计算策略；
+2. Explicit sharding：编译器必须严格遵守用户提供的分片方式，所以受到更强约束；
+3. **完全手动分片：```jax.shard_map``` 允许你编写面向单个设备的代码，并显式指定通信操作；**
+
+三者之间区别如下表所示：
+
+<center>
+
+| 模式 | 视角 | 显式分片 | 显式通信 |
+|:-------:|:-------:|:-------:|:-------:|
+| Auto  | Global  | ❌  | ❌  |
+| Explicit  | Global  | ✅  | ❌  |
+| Manual  | Per-device  | ✅  | ✅  | 
+
+</center>
+
+本篇博客主要介绍 ```jax.shard_map```，其主要包含三个参数：```mesh```, ```in_specs``` 与 ```out_specs```：
+
+> **```in_specs```：在某个位置提及设备轴名称表示将相应参数数组轴沿该设备轴进行分片；若未提及轴名称则表示复制.
+> ```out_specs```：在某个位置提及设备轴名称表示沿相应位置轴拼接分片；若未提及设备轴名称则表明该设备轴上各输出值相等，仅需返回单一数值.**
+
+如下是一个使用 ```jax.shard_map``` 进行计算的 Naive 例子：
+
+```python
+mesh = jax.make_mesh((4, 2), ("x", "y"))
+
+a = jnp.arange(8 * 16.).reshape(8, 16)
+b = jnp.arange(16 * 4.).reshape(16, 4)
+
+@jax.shard_map(
+    mesh=mesh,
+    in_specs=(P("x", "y"), P("y", None)),
+    out_specs=P("x", None)
+)
+def matmul_basic(a_block, b_block):
+    # a_block: [2, 8]
+    # b_block: [8, 4]
+    tmp = jnp.dot(a_block, b_block)
+    c_block = jax.lax.psum(tmp, "y")
+    # c_block: [2, 4]
+    return c_block
+
+all_close(matmul_basic(a, b), a @ b)
+```
+```text
+Array(True, dtype=bool)
+```
+
+在函数 ```matmul_basic``` 中：
+
+1. 矩阵 a 的维度 0 与维度 1 沿设备轴 x, y 进行分片，单设备上可见的 a 子矩阵大小为 [8 / 4, 16 / 2] = [2, 8]；
+2. 矩阵 b 的维度 0 沿设备轴 y 进行分片，由于设备轴 x 未提及，故 b 的子矩阵沿该设备轴方向做复制，单设备上可见的 b 的子矩阵大小为 [16 / 2， 4] = [8， 4]；
+3. 各设备进行矩阵乘法的 local 操作；
+4. 通过 ```jax.lax.psum``` 沿设备轴 y 进行 all-reduce；
+5. 通信确保沿设备轴 y 方向数据的一致性，故返回结果只需沿设备轴 x 方向进行拼接；
+
+**将设备视作网格并建立张量维度到设备轴的映射是 JAX 分布式计算的核心特色之一**. 下图展示了在 LLM 训练中常见的并行训练方式的设备 & 逻辑 mesh 的设置：
+
+<div align="center">
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX5.png"><br>
+  <b>Fig 5. 各并行策略下模型权重与数据在不同卡上的切分</b>
+</div>
 
 ## 显式随机管理
