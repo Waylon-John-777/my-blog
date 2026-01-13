@@ -64,7 +64,7 @@ x = jax.jit(trace_demo)(u=1, v=2)
 === Second time ===
 ```
 
-**Jaxpr (JAX expression)**：JAX 的中间表示语言，典型示例如下：
+**Jaxpr（JAX expression）**：JAX 的中间表示语言，典型示例如下：
 
 ```python
 print(jax.make_jaxpr(trace_demo)(u=1, v=2))
@@ -76,9 +76,9 @@ print(jax.make_jaxpr(trace_demo)(u=1, v=2))
   in (d,) }
 ```
 
-**XLA (Accelerated Linear Algebra)**：Google 开发的领域专用编译器，专门优化线性代数运算；
+**XLA（Accelerated Linear Algebra）**：Google 开发的领域专用编译器，专门优化线性代数运算；
 
-**HLO (High Level Operations)**：XLA 的中间表示，优化主要集中在这一层面：常量折叠，算子融合等；
+**HLO（High Level Operations）**：XLA 的中间表示，优化主要集中在这一层面：常量折叠，算子融合等；
 
 如下是使用 ```jax.jit``` 进行加速的一个简单示例：
 
@@ -234,8 +234,9 @@ JAX 的并行计算存在三种模式：
 
 本篇博客主要介绍 ```jax.shard_map```，其主要包含三个参数：```mesh```, ```in_specs``` 与 ```out_specs```：
 
-> **```in_specs```：在某个位置提及设备轴名称表示将相应参数数组轴沿该设备轴进行分片；若未提及轴名称则表示复制.
-> ```out_specs```：在某个位置提及设备轴名称表示沿相应位置轴拼接分片；若未提及设备轴名称则表明该设备轴上各输出值相等，仅需返回单一数值.**
+> **```in_specs```：在某个位置提及设备轴名称表示将相应参数数组轴沿该设备轴进行分片；若未提及轴名称则表示复制.**
+
+> **```out_specs```：在某个位置提及设备轴名称表示沿相应位置轴拼接分片；若未提及设备轴名称则表明该设备轴上各输出值相等，仅需返回单一数值.**
 
 如下是一个使用 ```jax.shard_map``` 进行计算的 Naive 例子：
 
@@ -278,5 +279,24 @@ Array(True, dtype=bool)
   <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX5.png"><br>
   <b>Fig 5. 各并行策略下模型权重与数据在不同卡上的切分</b>
 </div>
+
+### 通信原语
+JAX 的通信可通过 ```jax.lax.psum```, ```jax.lax.all_to_all``` 等 API 实现. 在 GPU 设备上，这些集合通信操作经过编译后最终会调用 NCCL.
+
+<div align="center">
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX6.png"><br>
+  <b>Fig 6. 常见通信操作图解</b>
+</div>
+
+**JAX 与 Pytorch 在分布式训练设计上的另一核心区别在于：JAX 可以“自动微分”集合通信操作，并生成相应的反向传播规则**. 这种设计让实现复杂的分布式策略更加优雅和可维护.
+
+另一在 JAX 中常使用的通信为 ```jax.lax.ppermute```，该操作需要指定设备轴及一组源索引、目标索引对. 这些索引代表局部数据沿该设备轴的坐标. ```jax.lax.ppermute``` 会将参数从每个源发送到对应的目的地. 
+
+<div align="center">
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX7.png"><br>
+  <b>Fig 7. 通过 permute 操作实现 reduce-scatter</b>
+</div>
+
+**在流水线并行以及计算-通信掩藏中，```jax.lax.ppermute``` 扮演着重要角色**.
 
 ## 显式随机管理
