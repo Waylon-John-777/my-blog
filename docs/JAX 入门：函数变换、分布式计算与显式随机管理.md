@@ -262,7 +262,7 @@ def matmul_basic(a_block, b_block):
 all_close(matmul_basic(a, b), a @ b)
 ```
 ```text
-Array(True, dtype=bool)
+True
 ```
 
 在函数 ```matmul_basic``` 中：
@@ -298,5 +298,84 @@ JAX 的通信可通过 ```jax.lax.psum```, ```jax.lax.all_to_all``` 等 API 实�
 </div>
 
 **在流水线并行以及计算-通信掩藏中，```jax.lax.ppermute``` 扮演着重要角色**.
+
+### Naive DP, FSDP, TP
+
+这一小节我们将展示数据并行，完全分片数据并行以及张量并行的 Naive 实现方式，首先需要初始化一个 Toy NN 和 random input/output：
+
+```python
+def init_layer(key, d_in, d_out):
+	k1, k2 = jax.random.split(key)
+	W = jax.random.normal(k1, (d_in, d_out)) / jnp.sqrt(d_in)
+	b = jax.random.normal(k2, (d_out,))
+	return W, b
+	
+def init(key, layer_sizes, batch_size):
+	key, *keys = jax.random.split(key, len(layer_sizes))
+	params = list(map(init_layer, keys, layer_sizes[:-1], layer_sizes[1:]))
+	key, *keys = jax.random.split(key, 3)
+	inputs = jax.random.normal(keys[0], (batch_size, layer_sizes[0]))
+	targets = jax.random.normal(keys[1], (batch_size, layer_sizes[-1]))
+	return params, (inputs, targets)
+
+def predict(params, inputs):
+	for W, b in params:
+		outputs = jnp.dot(inputs, W) + b
+		inputs = jax.nn.relu(outputs)
+	return outputs
+
+def loss(params, batch):
+	inputs, targets = batch
+	predictions = predict(params, inputs)
+	return jnp.mean(jnp.sum((predictions - targets) ** 2, axis=-1))
+```
+我们首先从最简单的数据并行出发：
+
+```python
+mesh = jax.make_mesh(axis_shapes=(8,), axis_names=("dp",))
+
+@jax.shard_map(
+	mesh=mesh,
+	in_specs=(P(None), P("dp")),
+	out_specs=P()
+)
+def loss_dp(params, local_batch):
+	inputs, targets = local_batch
+	predictions = predict(params, inputs)
+	local_loss = jnp.mean(
+		jnp.sum((predictions - targets) ** 2, axis=-1)
+	)
+	return jax.lax.pmean(local_loss, "dp")
+```
+
+1. 设置 DP 轴；
+2. 将网络参数沿 DP 轴复制，将输入/输出张量的第 0 维度沿 DP 轴切分；
+3. 正常前向传播；
+4. 将 loss 值沿设备 DP 轴做 all-reduce（```jax.lax.pmean```）；
+
+可以通过比较 ```loss``` 与 ```loss_dp``` 以及 ```jax.grad(loss)``` 与 ```jax.grad(loss_dp)``` 来验证 Naive DP 中前后向传播的正确性. **在 JAX 中集合通信操作是可微的，开发者仅需编写前向传播逻辑，反向传播的通信操作将自动生成，这极大简化了代码**.
+
+```python
+params, batch = init(
+	key=jax.random.key(42),
+	layer_sizes=[784, 128, 128, 128, 128, 128, 64],
+	batch_size=32
+)
+print(
+	all_close(
+		loss(params, batch), loss_dp(params, batch)
+	)
+)
+print(
+	all_close(
+		jax.grad(loss)(params, batch), jax.grad(loss_dp)(params, batch)
+	)
+)
+```
+
+```text
+True
+True
+```
 
 ## 显式随机管理
