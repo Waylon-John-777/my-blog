@@ -440,6 +440,61 @@ mesh = jax.make_mesh(axis_shapes=(8,), axis_names=("tp",))
 def gemm_tp(inputs, W, b):
 	outputs = jnp.dot(inputs, W)
 	return jax.lax.psum_scatter(outputs, "tp", scatter_dimension=1, tiled=True) + b
+	
+def predict_tp(params, inputs):
+	for W, b in params:
+		outputs = gemm_tp(inputs, W, b)
+		inputs = jax.nn.relu(outputs)
+	return outputs
+	
+def loss_tp(params, batch):
+	inputs, targets = batch
+	predictions = predict_tp(params, inputs)
+	return jnp.mean(jnp.sum((predictions - targets) ** 2, axis=-1))
 ```
 
+1. 设置 TP 轴；
+2. 在线性变换中，将输入张量的第 1 维度和矩阵 W 的第 0 维度沿设备划分；
+3. local 矩阵乘计算完毕后使用 reduce-scatter 进行通信，此时每张卡拿到矩阵乘结果沿第 1 维度的切片，再与本地 bias 相加以及通过激活函数；
+4. 重复上述操作完成前向传播；
+
+#### 联合并行简单示例
+
+尽管这篇文档的目的在于以尽可能简单的示例展现 JAX 有别于其它深度学习框架的特点，但在分布式计算中，若不谈及联合并行方式，便不足以展现 JAX 的真正强大. 这一小节我们以 FSDP + TP 为例进行说明.
+
+```python
+mesh = jax.make_mesh(axis_shapes=(4, 2), ("fsdp", "tp"))
+
+@partial(jax.checkpoint, policy=lambda op, *_, **__: str(op) != "all_gather")
+def predict_fsdp_tp(params_frag, inputs):
+	for W_frag, b_frag in params_frag:
+		W = jax.lax.all_gather(W_frag, "fsdp", tiled=True)
+		b = jax.lax.all_gather(b_frag, "fsdp", tiled=True)
+		outputs = jnp.dot(inputs, W)
+		outputs = jax.lax.psum_scatter(outputs, "tp", scatter_dimension=1, tiled=True) + b
+		inputs = jax.nn.relu(outputs)
+	return outputs
+
+@jax.shard_map(
+	mesh=mesh,
+	in_specs=(P(("tp", "fsdp")), P("fsdp", "tp")),
+	out_specs=P()
+)
+def loss_fsdp_tp(local_params, local_batch):
+	inputs, targets = local_batch
+	predictions = predict_fsdp_tp(local_params, inputs)
+	loss = jax.lax.psum(jnp.sum((predictions - targets) ** 2, axis=-1), "tp")
+	return jax.lax.pmean(jnp.mean(loss), "fsdp")
+```
+
+1. 划分 4 * 2 设备 mesh，其中第 0 维是 FSDP 轴，第 1 维是 TP 轴；
+2. 将输入/目标张量的维度 0 沿 FSDP 轴切片，维度 1 沿 TP 轴切片；
+3. 将网络参数的第 0 维度沿 FSDP & TP 的联合轴做划分（列优先）；
+4. 在前向传播中，通过 ```jax.lax.all_gather``` 指定网络参数沿 FSDP 轴做聚合（```jax.checkpoint``` 在当前层计算完成后放弃对 all-gather 结果的缓存）；
+5. local 矩阵乘操作，沿 TP 轴做 reduce-scatter，再与本地 bias 相加；
+6. 输出层计算损失时，先沿 TP 轴求和，再沿 FSDP 轴做平均；
+
 ## 显式随机管理
+
+## 参考资料
+[[1] Manual parallelism with shard_map](https://docs.jax.dev/en/latest/notebooks/shard_map.html)
