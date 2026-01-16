@@ -329,6 +329,8 @@ def loss(params, batch):
 	predictions = predict(params, inputs)
 	return jnp.mean(jnp.sum((predictions - targets) ** 2, axis=-1))
 ```
+#### Data Parallelism
+
 我们首先从最简单的数据并行出发：
 
 ```python
@@ -349,7 +351,7 @@ def loss_dp(params, local_batch):
 ```
 
 1. 设置 DP 轴；
-2. 将网络参数沿 DP 轴复制，将输入/输出张量的第 0 维度沿 DP 轴切分；
+2. 将网络参数沿 DP 轴复制，将输入/目标张量的第 0 维度沿 DP 轴切分；
 3. 正常前向传播；
 4. 将 loss 值沿设备 DP 轴做 all-reduce（```jax.lax.pmean```）；
 
@@ -376,6 +378,68 @@ print(
 ```text
 True
 True
+```
+#### Fully Sharded Data Parallelism
+
+完全分片数据并行是由 Meta 提出的分布式训练方式. 其核心思想可由如下伪代码表述：
+
+```text
+FSDP forward pass:
+	for layer_i in layers:
+		all-gather full weights for layer_i
+		forward pass for layer_i
+		discard full weights for layer_i
+		
+FSDP backward pass:
+	for layer_i in layers:
+		all-gather full weights for layer_i
+		backward pass for layer_i
+		discard full weights for layer_i
+		reduce-scatter gradients for layer_i
+```
+
+在 JAX 中的实现可以归纳如下：
+
+```python
+mesh = jax.make_mesh(axis_shapes=(8,), axis_names=("fsdp",))
+
+@jax.shard_map(mesh=mesh, in_specs=(P("fsdp"), P("fsdp")), out_specs=P())
+@partial(jax.checkpoint, policy=lambda op, *_, **__: str(op) != "all_gather")
+def loss_fsdp(params_frag, local_batch):
+	inputs, targets = local_batch
+	for W_frag, b_frag in params_frag:
+		W = jax.lax.all_gather(W_frag, "fsdp", tiled=True)
+		b = jax.lax.all_gather(b_frag, "fsdp", tiled=True)
+		outputs = jnp.dot(inputs, W) + b
+		inputs = jax.nn.relu(outputs)
+	local_loss = jnp.mean(
+		jnp.sum((outputs - targets) ** 2, axis=-1)
+	)
+	return jax.lax.pmean(local_loss, "fsdp")
+```
+
+1. 设置 FSDP 轴；
+2. 将网络参数，输入/目标张量的第 0 维度沿 FSDP 轴切分；
+3. 前向传播临时聚合网络参数，用完丢弃；
+4. 沿 FSDP 轴对 loss 进行归约；
+
+基于 ```all_close``` 不难对 ```loss_fsdp``` 进行正确性验证. **上述代码利用 ```jax.checkpoint``` 控制网络的中间缓存量，未有缓存的中间值将在反向传播时重新计算**.
+
+#### Tensor Parallelism
+
+最后我们简要阐述一下张量并行，张量并行的核心思想在于利用矩阵的分块乘法，其实现思路大致如下：
+
+```python
+mesh = jax.make_mesh(axis_shapes=(8,), axis_names=("tp",))
+
+@jax.shard_map(
+	mesh=mesh,
+	in_specs=(P(None, "tp"), P("tp", None), P("tp")),
+	out_specs=P(None, "tp")
+)
+def gemm_tp(inputs, W, b):
+	outputs = jnp.dot(inputs, W)
+	return jax.lax.psum_scatter(outputs, "tp", scatter_dimension=1, tiled=True) + b
 ```
 
 ## 显式随机管理
