@@ -43,14 +43,6 @@
       color: var(--text-color);
     }
 
-    html[data-theme='dark'] .sidebar ul li a {
-      color: var(--text-color);
-    }
-
-    html[data-theme='dark'] .sidebar ul li a:hover {
-      color: var(--theme-color);
-    }
-
     html[data-theme='dark'] .markdown-section {
       color: var(--text-color);
     }
@@ -265,6 +257,116 @@
     html[data-theme='dark'] .docsify-count {
       color: #8b949e;
     }
+
+    /* ===== 侧边栏优化样式 ===== */
+
+    /* 侧边栏整体优化 */
+    .sidebar {
+      padding-top: 20px;
+    }
+
+    .sidebar-nav {
+      padding: 0 15px;
+    }
+
+    /* 侧边栏链接样式 */
+    .sidebar ul li a {
+      padding: 8px 12px;
+      margin: 2px 0;
+      border-radius: 6px;
+      display: block;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .sidebar ul li a:hover {
+      background-color: rgba(66, 185, 131, 0.1);
+      color: var(--theme-color);
+      transform: translateX(3px);
+    }
+
+    /* 当前激活项高亮 */
+    .sidebar ul li a.active {
+      background-color: rgba(66, 185, 131, 0.15);
+      color: var(--theme-color);
+      font-weight: 500;
+      border-left: 3px solid var(--theme-color);
+      padding-left: 9px;
+    }
+
+    /* 分类标题样式 */
+    .sidebar-nav > ul > li > p {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-color);
+      padding: 10px 12px;
+      margin: 15px 0 5px 0;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-nav > ul > li > p:hover {
+      color: var(--theme-color);
+    }
+
+    /* 折叠箭头样式 */
+    .sidebar-nav > ul > li > p::before {
+      content: '▼';
+      font-size: 10px;
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+
+    .sidebar-nav > ul > li.collapsed > p::before {
+      transform: rotate(-90deg);
+    }
+
+    /* 折叠动画 */
+    .sidebar-nav > ul > li > ul {
+      overflow: hidden;
+      max-height: 1000px;
+      transition: max-height 0.3s ease-out, opacity 0.3s ease;
+      opacity: 1;
+    }
+
+    .sidebar-nav > ul > li.collapsed > ul {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    /* 子菜单缩进 */
+    .sidebar ul ul li a {
+      padding-left: 24px;
+    }
+
+    /* 暗色模式侧边栏优化 */
+    html[data-theme='dark'] .sidebar ul li a:hover {
+      background-color: rgba(66, 211, 146, 0.1);
+    }
+
+    html[data-theme='dark'] .sidebar ul li a.active {
+      background-color: rgba(66, 211, 146, 0.15);
+    }
+
+    /* 首页链接特殊样式 */
+    .sidebar-nav > ul > li:first-child > a {
+      font-weight: 500;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    /* 移动端侧边栏优化 */
+    @media (max-width: 768px) {
+      .sidebar ul li a {
+        padding: 12px 15px;
+        font-size: 15px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -369,7 +471,7 @@
         crossChapterText: true
       },
 
-      // 图片放大
+      // 图片放大 & 侧边栏折叠
       plugins: [
         function(hook, vm) {
           hook.doneEach(function() {
@@ -380,9 +482,49 @@
                 background: 'rgba(0, 0, 0, 0.8)'
               });
             }
+
+            // 初始化侧边栏折叠功能
+            initSidebarCollapse();
           });
         }
       ]
+    }
+
+    // 侧边栏折叠功能
+    function initSidebarCollapse() {
+      const sidebar = document.querySelector('.sidebar-nav');
+      if (!sidebar) return;
+
+      // 获取所有包含子菜单的分类项
+      const categories = sidebar.querySelectorAll(':scope > ul > li');
+
+      categories.forEach(function(category) {
+        const subList = category.querySelector('ul');
+        const title = category.querySelector('p');
+
+        if (subList && title) {
+          // 从 localStorage 恢复折叠状态
+          const categoryName = title.textContent.trim();
+          const isCollapsed = localStorage.getItem('sidebar-' + categoryName) === 'collapsed';
+
+          if (isCollapsed) {
+            category.classList.add('collapsed');
+          }
+
+          // 点击标题切换折叠
+          title.addEventListener('click', function(e) {
+            e.preventDefault();
+            category.classList.toggle('collapsed');
+
+            // 保存折叠状态到 localStorage
+            if (category.classList.contains('collapsed')) {
+              localStorage.setItem('sidebar-' + categoryName, 'collapsed');
+            } else {
+              localStorage.removeItem('sidebar-' + categoryName);
+            }
+          });
+        }
+      });
     }
   </script>
 

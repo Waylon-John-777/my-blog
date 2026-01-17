@@ -4,7 +4,7 @@
 
 ## 简介
 
-**JAX 是 Google 开发的高性能数值计算库，主要用于机器学习研究**. 2025 年在旧金山的 PyTorch 会议中，Luca Antiga 在接受采访的时候明确指出 JAX 是 PyTorch 竞争力强大的对手之一：
+<mark>**JAX 是 Google 开发的高性能数值计算库，主要用于机器学习研究**</mark>. 2025 年在旧金山的 PyTorch 会议中，Luca Antiga 在接受采访的时候明确指出 JAX 是 PyTorch 竞争力强大的对手之一：
 
 > …“Throughout all these revolutions that came, you always see PyTorch there,” he said. “And there are, of course, others like JAX and so on —— they’re very strong.”…
 
@@ -22,7 +22,7 @@
   <b>Fig 2. 2025 年 11 月 19 日发布的 Gemini 3 在主流评测集的分数实现了近乎全面（甚至是断崖式的）领先</b>
 </div>
 
-**这篇文档旨在通过尽可能简单的示例展现 JAX 有别于其它深度学习框架的特点，包括其函数式编程，分布式计算以及显式随机管理**. JAX 通过将 NumPy 的易用性、自动微分的强大以及 XLA 的极致性能相结合，为研究人员和开发者提供了一个强大的工具，用于探索机器学习和科学计算的前沿.
+**这篇文档旨在通过尽可能简单的示例展现 JAX 有别于其它深度学习框架的特点，<mark>包括其函数式编程，分布式计算以及显式随机管理</mark>**. JAX 通过将 NumPy 的易用性、自动微分的强大以及 XLA 的极致性能相结合，为研究人员和开发者提供了一个强大的工具，用于探索机器学习和科学计算的前沿.
 
 ## 函数式编程
 
@@ -78,7 +78,7 @@ print(jax.make_jaxpr(trace_demo)(u=1, v=2))
 
 **XLA（Accelerated Linear Algebra）**：Google 开发的领域专用编译器，专门优化线性代数运算；
 
-**HLO（High Level Operations）**：XLA 的中间表示，优化主要集中在这一层面：常量折叠，算子融合等；
+**HLO（High Level Operations）**：XLA 的中间表示，<mark>优化主要集中在这一层面：常量折叠，算子融合等</mark>；
 
 如下是使用 ```jax.jit``` 进行加速的一个简单示例：
 
@@ -98,7 +98,7 @@ def test_fn(x):
 487 ms ± 2.28 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 ```
 
-其中 ```.block_until_ready()``` 用以确保异步执行完成，获得准确计时.
+其中 ```.block_until_ready()``` 用以<mark>确保异步执行完成</mark>，获得准确计时.
 
 ### jax.grad
 > ```jax.grad```：JAX 的自动微分，用以计算函数的梯度
@@ -147,7 +147,7 @@ print(f"Check the second order derivatives: {all_close(ddf(t), jax.hessian(f)(t)
 Check the first order derivatives: True
 Check the second order derivatives: True
 ```
-此外，对于多元向量函数 $g: \mathbb R^n \rightarrow \mathbb R^m$，我们可以使用 ```jax.jacobian``` 查看其雅可比矩阵. **JAX 的各种变换在遵循一定规则的情况下可以自由嵌套使用，这种可组合性是 JAX 区别于其它框架的重要特性**.
+此外，对于多元向量函数 $g: \mathbb R^n \rightarrow \mathbb R^m$，我们可以使用 ```jax.jacobian``` 查看其雅可比矩阵. <mark>**JAX 的各种变换在遵循一定规则的情况下可以自由嵌套使用，这种可组合性是 JAX 区别于其它框架的重要特性**</mark>.
 
 ### jax.vmap
 > ```jax.vmap```：自动将针对单个样本编写的函数向量化为批处理版本，无需手动编写循环或修改代码
@@ -181,7 +181,7 @@ b = jax.random.normal(jax.random.key(1), shape=(1000, 256))
 149 μs ± 17.1 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
 485 μs ± 8.66 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
 ```
-可见 ```batch_cosine_simi``` 与 ```jax.vmap(cosine_simi)``` 性能相当（均为 μs 量级），**但 ```jax.vmap``` 的价值在于让复杂操作变得简单可写.**
+可见 ```batch_cosine_simi``` 与 ```jax.vmap(cosine_simi)``` 性能相当（均为 μs 量级），<mark>**但 ```jax.vmap``` 的价值在于让复杂操作变得简单可写</mark>.**
 
 除了上述提及的功能， JAX 中还存在：
 
@@ -195,7 +195,7 @@ b = jax.random.normal(jax.random.key(1), shape=(1000, 256))
 
 ### 数据分片
 
-分布式计算的核心概念之一是数据分片，它描述了数据在可用设备之间的布局方式. **JAX 的数据类型——不可变的 ```jax.Array``` 数组结构——设计初衷就是面向分布式数据与计算**.
+分布式计算的核心概念之一是数据分片，它描述了数据在可用设备之间的布局方式. **JAX 的数据类型——不可变的 ```jax.Array``` 数组结构——设计初衷就是<mark>面向分布式数据与计算</mark>**.
 
 每一个 ```jax.Array``` 都有一个关联的 ```jax.sharding.Sharding``` 对象，用来描述在全局数组中，每个设备应该负责哪一块数据. 当我们从零创建一个 ```jax.Array``` 时，也必须同时创建其对应的 ```Sharding```. 一般情况下，数组被划分在单一设备，使用 ```jax.device_put``` 可将数组重分片：
 
@@ -214,7 +214,7 @@ jax.debug.visualize_array_sharding(sharded_arr)
 
 ### jax.shard_map
 
-JAX 的并行计算存在三种模式：
+<mark>JAX 的并行计算存在三种模式</mark>：
 
 1. 通过 ```jax.jit``` 实现的自动管理：编译器会自动选择最优计算策略；
 2. Explicit sharding：编译器必须严格遵守用户提供的分片方式，所以受到更强约束；
@@ -273,7 +273,7 @@ True
 4. 通过 ```jax.lax.psum``` 沿设备轴 y 进行 all-reduce；
 5. 通信确保沿设备轴 y 方向数据的一致性，故返回结果只需沿设备轴 x 方向进行拼接；
 
-**将设备视作网格并建立张量维度到设备轴的映射是 JAX 分布式计算的核心特色之一**. 下图展示了在 LLM 训练中常见的并行训练方式的设备 & 逻辑 mesh 的设置：
+<mark>**将设备视作网格并建立张量维度到设备轴的映射是 JAX 分布式计算的核心特色之一**</mark>. 下图展示了在 LLM 训练中常见的并行训练方式的设备 & 逻辑 mesh 的设置：
 
 <div align="center">
   <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX5.png"><br>
@@ -288,7 +288,7 @@ JAX 的通信可通过 ```jax.lax.psum```, ```jax.lax.all_to_all``` 等 API 实�
   <b>Fig 6. 常见通信操作图解</b>
 </div>
 
-**JAX 与 Pytorch 在分布式训练设计上的另一核心区别在于：JAX 可以“自动微分”集合通信操作，并生成相应的反向传播规则**. 这种设计让实现复杂的分布式策略更加优雅和可维护.
+<mark>**JAX 与 Pytorch 在分布式训练设计上的另一核心区别在于：JAX 可以“自动微分”集合通信操作，并生成相应的反向传播规则**</mark>. 这种设计让实现复杂的分布式策略更加优雅和可维护.
 
 另一在 JAX 中常使用的通信为 ```jax.lax.ppermute```，该操作需要指定设备轴及一组源索引、目标索引对. 这些索引代表局部数据沿该设备轴的坐标. ```jax.lax.ppermute``` 会将参数从每个源发送到对应的目的地. 
 
@@ -355,7 +355,7 @@ def loss_dp(params, local_batch):
 3. 正常前向传播；
 4. 将 loss 值沿设备 DP 轴做 all-reduce（```jax.lax.pmean```）；
 
-可以通过比较 ```loss``` 与 ```loss_dp``` 以及 ```jax.grad(loss)``` 与 ```jax.grad(loss_dp)``` 来验证 Naive DP 中前后向传播的正确性. **在 JAX 中集合通信操作是可微的，开发者仅需编写前向传播逻辑，反向传播的通信操作将自动生成，这极大简化了代码**.
+可以通过比较 ```loss``` 与 ```loss_dp``` 以及 ```jax.grad(loss)``` 与 ```jax.grad(loss_dp)``` 来验证 Naive DP 中前后向传播的正确性. <mark>**在 JAX 中集合通信操作是可微的，开发者仅需编写前向传播逻辑，反向传播的通信操作将自动生成，这极大简化了代码**</mark>.
 
 ```python
 params, batch = init(
@@ -423,7 +423,7 @@ def loss_fsdp(params_frag, local_batch):
 3. 前向传播临时聚合网络参数，用完丢弃；
 4. 沿 FSDP 轴对 loss 进行归约；
 
-基于 ```all_close``` 不难对 ```loss_fsdp``` 进行正确性验证. **上述代码利用 ```jax.checkpoint``` 控制网络的中间缓存量，未有缓存的中间值将在反向传播时重新计算**.
+基于 ```all_close``` 不难对 ```loss_fsdp``` 进行正确性验证. **上述代码利用 ```jax.checkpoint``` 控制网络的中间缓存量，<mark>未有缓存的中间值将在反向传播时重新计算</mark>**.
 
 #### Tensor Parallelism
 
@@ -460,7 +460,7 @@ def loss_tp(params, batch):
 
 #### 联合并行简单示例
 
-尽管这篇文档的目的在于以尽可能简单的示例展现 JAX 有别于其它深度学习框架的特点，但在分布式计算中，若不谈及联合并行方式，便不足以展现 JAX 的真正强大. 这一小节我们以 FSDP + TP 为例进行说明.
+尽管这篇文档的目的在于以尽可能简单的示例展现 JAX 有别于其它深度学习框架的特点，<mark>但在分布式计算中，若不谈及联合并行方式，便不足以展现 JAX 的真正强大</mark>. 这一小节我们以 FSDP + TP 为例进行说明.
 
 ```python
 mesh = jax.make_mesh(axis_shapes=(4, 2), ("fsdp", "tp"))
@@ -496,5 +496,139 @@ def loss_fsdp_tp(local_params, local_batch):
 
 ## 显式随机管理
 
+与 NumPy, PyTorch 等库不同，JAX 采用显式的随机状态管理. 显式管理让程序行为<mark>可预测，可追踪，可复现</mark>——代价则是需要手动管理 key 的传递和分割.
+
+```python
+key = jax.random.key(42)
+key, k1, k2 = jax.random.split(key, 3)
+x = jax.random.normal(k1, shape=(3, 3))
+y = jax.random.normal(k2, shape=(3, 3))
+print(f"{x = }")
+print(f"{y = }")
+``` 
+```text
+x = Array([[ 0.60576403,  0.7990441 , -0.908927  ],
+       [-0.63525754, -1.2226585 , -0.83226097],
+       [-0.47417238, -1.2504351 , -0.17678244]], dtype=float32)
+y = Array([[ 0.4323065 ,  0.5872638 , -1.1416743 ],
+       [-0.37379906, -0.19910173, -1.7271094 ],
+       [-1.8330271 , -0.46168378, -0.03195509]], dtype=float32)
+```
+
+显式 key 是一个不可变的值，这避免了分布式计算下的全局状态同步问题，实现了场景的精确控制.
+
+### nnx.Rngs
+
+Flax NNX（Google 开发的 Flax 神经网络库的新一代 API）使用有状态的 ```nnx.Rngs``` 类来简化 JAX 对随机性的管理. 要创建一个 ```nnx.Rngs``` 对象，你只需在构造时为任意关键字参数传入一个整数或 ```jax.random.key```：
+
+```python
+rngs = nnx.Rngs(params=0, dropout=1)
+nnx.display(rngs)
+```
+```text
+Rngs( # RngState: 4 (24 B)
+	params=RngStream( # RngState: 2 (12 B)
+		tag='params',
+		key=RngKey( # 1 (8 B)
+			value=# jax.Array key<fry>()
+			Array((), dtype=key<fry>) overlaying:
+			[0 0]
+			,
+			tag='params',
+		),
+		count=RngCount( # 1 (4 B)
+			value=<jax.Array(0, dtype=uint32)>,
+			tag='params',
+		),
+	),
+	dropout=RngStream( # RngState: 2 (12 B)
+		tag='dropout',
+		key=RngKey( # 1 (8 B)
+			value=# jax.Array key<fry>()
+			Array((), dtype=key<fry>) overlaying:
+			[0 1]
+			,
+			tag='dropout',
+		),
+		count=RngCount( # 1 (4 B)
+			value=<jax.Array(0, dtype=uint32)>,
+			tag='dropout',
+		),
+	),
+)
+```
+
+<mark>```nnx.Rngs```能够创建多个具有名字的 PRNG key 流. 要生成新的 key，可以访问其中的一个流并调用它的 ```__call__``` 方法</mark>. **此操作会使 count 自增但 key 属性本身不会发生改变**.
+
+```python
+params_key = rngs.params()
+dropout_key = rngs.dropout()
+print(f"{params_key = }")
+print(f"{dropout_key = }")
+```
+```text
+params_key = Array((), dtype=key<fry>) overlaying:
+[1797259609 2579123966]
+dropout_key = Array((), dtype=key<fry>) overlaying:
+[ 507451445 1853169794]
+```
+
+<mark>**事实上 Flax NNX 内置的各类层只使用两个标准的 PRNG key 流名称：params 用于参数初始化，dropout 用于创建随机掩码**</mark>.
+
+### 采样
+
+在 JAX 中进行采样，一个常见的做法是生成一个 key 然后传给 ```jax.random``` 的某个函数. ```nnx.RngStream``` 提供了与 ```jax.random``` 相同签名的方法，但不再需要手动传递 key：
+
+```python
+x = rngs.params.normal((3, 3))
+y = rngs.dropout.exponential((10,))
+print(f"{x = }")
+print(f"{y = }")
+```
+```text
+x = Array([[-2.4424558 , -2.0356805 ,  0.20554423],
+       [-0.3535502 , -0.76197404, -1.1785518 ],
+       [-1.1482196 ,  0.29716578, -1.3105359 ]], dtype=float32)
+y = Array([0.5169214 , 0.79605514, 0.2518507 , 0.19346236, 2.1336777 ,
+       0.83475715, 0.10780825, 0.07331487, 0.5416562 , 1.9597657 ],      dtype=float32)
+```
+
+### 随机态分叉
+假设我们在一个批次数据上使用 dropout，显然对于不同批次的 dropout mask 应使用不同的随机状态. 这可以通过 fork 方法实现：
+
+```python
+class Model(nnx.Module):
+	def __init__(self, rngs: nnx.Rngs):
+		self.linear = nnx.Linear(10, 10, rngs=rngs)
+		self.dropout = nnx.Dropout(0.1)
+		
+	def __call__(self, x, rngs: nnx.Rngs):
+		return nnx.relu(self.dropout(self.linear(x), rngs=rngs))
+		
+model = Model(rngs=nnx.Rngs(0))
+
+@nnx.vmap(in_axes=(None, 0, 0), out_axes=0)
+def model_forward(model, x, rngs):
+	return model(x, rngs=rngs)
+	
+forked_rngs = nnx.Rngs(1).fork(split=5)
+model_forward(model, jnp.ones((5, 10)), forked_rngs)
+```
+
+在 Flax 中，还有另一种处理调用时随机性的方式：我们可以把随机状态直接绑定到 Module 内部，这样，随机状态就变成了另一类 Module State. 使用这种“隐式随机状态”需要在初始化 Module 时通过 rngs 关键字参数传入随机性：
+
+```python
+class Model(nnx.Module):
+	def __init__(self, rngs: nnx.Rngs):
+		self.linear = nnx.Linear(10, 10, rngs=rngs)
+		self.dropout = nnx.Dropout(0.1, rngs=rngs)
+		
+	def __call__(self, x):
+		return nnx.relu(self.dropout(self.linear(x)))
+		
+model = Model(rngs=nnx.Rngs(params=0, dropout=1))
+```
+
 ## 参考资料
 [[1] Manual parallelism with shard_map](https://docs.jax.dev/en/latest/notebooks/shard_map.html)
+[[2] Basic Guides: Randomness](https://flax.readthedocs.io/en/stable/guides/randomness.html)
