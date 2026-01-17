@@ -631,4 +631,5 @@ model = Model(rngs=nnx.Rngs(params=0, dropout=1))
 
 ## 参考资料
 [[1] Manual parallelism with shard_map](https://docs.jax.dev/en/latest/notebooks/shard_map.html)
+
 [[2] Basic Guides: Randomness](https://flax.readthedocs.io/en/stable/guides/randomness.html)

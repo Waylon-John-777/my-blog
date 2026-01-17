@@ -355,9 +355,43 @@
 
     /* 首页链接特殊样式 */
     .sidebar-nav > ul > li:first-child > a {
-      font-weight: 500;
+      font-weight: 600;
       padding: 10px 12px;
       margin-bottom: 10px;
+      font-size: 15px;
+      color: var(--theme-color);
+    }
+
+    /* 文章标题加粗 */
+    .sidebar ul ul li > a:first-child {
+      font-weight: 600;
+    }
+
+    /* 子节（文章内标题）间距优化 */
+    .sidebar ul ul ul {
+      margin: 0;
+      padding-left: 12px;
+    }
+
+    .sidebar ul ul ul li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar ul ul ul li a {
+      padding: 4px 12px;
+      margin: 1px 0;
+      font-size: 13px;
+      font-weight: 400;
+      color: #666;
+    }
+
+    html[data-theme='dark'] .sidebar ul ul ul li a {
+      color: #8b949e;
+    }
+
+    .sidebar ul ul ul li a:hover {
+      color: var(--theme-color);
     }
 
     /* 移动端侧边栏优化 */
