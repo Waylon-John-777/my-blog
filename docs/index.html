@@ -358,30 +358,49 @@
       font-weight: 600;
     }
 
-    /* 子节（文章内标题）间距优化 */
-    .sidebar ul ul ul {
+    /* 子节（文章内标题）间距优化 - 固定缩进，不随嵌套层级累加 */
+    .sidebar ul ul ul,
+    .sidebar ul ul ul ul,
+    .sidebar ul ul ul ul ul {
       margin: 0;
-      padding-left: 12px;
+      padding-left: 0;  /* 移除嵌套缩进 */
     }
 
-    .sidebar ul ul ul li {
+    .sidebar ul ul ul li,
+    .sidebar ul ul ul ul li,
+    .sidebar ul ul ul ul ul li {
       margin: 0;
       padding: 0;
     }
 
+    /* h2 标题（三级嵌套）- 固定缩进 */
     .sidebar ul ul ul li a {
-      padding: 4px 12px;
+      padding: 4px 12px 4px 36px;  /* 固定左边距 */
       margin: 1px 0;
       font-size: 13px;
       font-weight: 400;
       color: #666;
     }
 
-    html[data-theme='dark'] .sidebar ul ul ul li a {
+    /* h3 标题（四级嵌套）- 固定缩进，比 h2 多一级 */
+    .sidebar ul ul ul ul li a {
+      padding-left: 48px;  /* 固定左边距 */
+    }
+
+    /* h4 标题（五级嵌套）- 固定缩进，比 h3 多一级 */
+    .sidebar ul ul ul ul ul li a {
+      padding-left: 60px;  /* 固定左边距 */
+    }
+
+    html[data-theme='dark'] .sidebar ul ul ul li a,
+    html[data-theme='dark'] .sidebar ul ul ul ul li a,
+    html[data-theme='dark'] .sidebar ul ul ul ul ul li a {
       color: #8b949e;
     }
 
-    .sidebar ul ul ul li a:hover {
+    .sidebar ul ul ul li a:hover,
+    .sidebar ul ul ul ul li a:hover,
+    .sidebar ul ul ul ul ul li a:hover {
       color: var(--theme-color);
     }
 
