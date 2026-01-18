@@ -1,4 +1,7 @@
 # Multi-Head Latent Attention
+
+*本文撰写于 2025 年 12 月 28 日，最后更新于 2026 年 01 月 18 日*
+
 ## 多头注意力简要回顾
 
 设 $d$ 为嵌入维度，$n_h$ 为注意力头的数量，$d_h$ 为每个注意力头的维度，并且 $\mathbf h_t \in \mathbb R^d$ 表示在某一注意力层中第 $t$ 个 token 的注意力输入向量. 标准的多头注意力计算首先通过投影矩阵 $W^Q, W^K, W^V \in \mathbb R^{n_hd_h \times d}$ 生成 $\mathbf q_t, \mathbf k_t, \mathbf v_t \in \mathbb R^{n_hd_h}$ 向量：
@@ -52,11 +55,15 @@ $$
 \end{align} 
 $$
 
-$\mathbf c_t^{K, V} \in \mathbb R^{d_c}$ 为 key 和 value 的压缩潜在表示，$d_c \, (\ll n_hd_h)$ 为压缩维度. 推理阶段，MLA 仅需缓存 $\mathbf c_t^{K, V}$，故单一 token 的 KV Cache 大小为 $d_cl$，**压缩比为 $\dfrac{d_c}{2n_hd_h}$.**
+$\mathbf c_t^{K, V} \in \mathbb R^{d_c}$ 为 key 和 value 的压缩潜在表示，$d_c \, (\ll n_hd_h)$ 为压缩维度. 推理阶段，MLA 仅需缓存 $\mathbf c_t^{K, V}$，故单一 token 的 KV Cache 大小为 $d_cl$，<mark>**压缩比为 $\dfrac{d_c}{2n_hd_h}$**</mark>.
 
 ## 上投影矩阵的合并
 
-我们在 MLA 的设置下重新审视一下式 $(7)$ 与式 $(8)$：
+[[1]](https://arxiv.org/abs/2405.04434) 中曾简要提及到：
+
+> In addition, during inference, since $W_U^K$ can be absorbed into $W^Q$, and $W_U^V$ can be absorbed into $W^O$, we even do not need to compute keys and values out for attention.
+
+<mark>但未有给出详细论证</mark>. 我们在 MLA 的设置下重新审视一下式 $(7)$ 与式 $(8)$：
 
 $$
 \begin{align}
@@ -74,10 +81,15 @@ $$
 \end{align} 
 $$
 
-可见上投影阵 $W_U^K$ 和 $W_U^V$ 在实际计算中可以被以某种形式融入新矩阵 $\tilde W^Q$ 和 $\tilde W^O$ 的构建.
+可见上投影阵 $W_U^K$ 和 $W_U^V$ 在实际计算中的确可以被以某种形式融入新矩阵 $\tilde W^Q$ 和 $\tilde W^O$ 的构建.
+
 ## RoPE 解耦
 
-## 矩阵计算与代码展示
+TBC
+
+## 参考资料
+
+[[1] DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434)
 
 ---
 

@@ -101,7 +101,7 @@ $$X = U \, \Phi^k(\Sigma) \, V^\top \tag 3$$
 
 $$\mathbf W_t = \mathbf W_{t - 1} - \eta_t \left(0.2 \cdot \sqrt{\max(A, B)} \cdot \mathbf O_t + \lambda \mathbf W_{t - 1}\right) \tag 4$$
 
-## 参考文献
+## 参考资料
 
 [[1] Muon: An optimizer for hidden layers in neural networks](<https://kellerjordan.github.io/posts/muon/>)
 
