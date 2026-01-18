@@ -78,3 +78,16 @@ $$
 ## RoPE 解耦
 
 ## 矩阵计算与代码展示
+
+---
+
+## 引用本文
+
+```bibtex
+@misc{waylonblog2026,
+  author = {Waylon John},
+  title = {Multi-Head Latent Attention},
+  year = {2026},
+  url = {https://waylon-john-777.github.io/my-blog/#/MLA}
+}
+```

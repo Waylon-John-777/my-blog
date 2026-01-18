@@ -16,7 +16,7 @@ $$\mathcal J^{seq} (\theta) = \mathbb E_{x \sim \mathcal D, \, y \sim \pi_\theta
 
 $$\mathcal J^{seq} (\theta) = \mathbb E_{x \sim \mathcal D, \, y \sim \mu_{\theta_{old}}(\cdot | x)} \left[ \, \frac{\pi_\theta (y | x)}{\mu_{\theta_{old}} (y|x)} R(x, y) \, \right] \tag 3$$
 
-$\mu$ 在这里代表推理引擎中的策略，它与训练引擎中的策略 $\pi$ 存在数值差异因此需要做重要性采样修正偏差. **$\frac{\pi_\theta (y | x)}{\mu_{\theta_{old}} (y|x)}$ 涉及长序列连乘，直接优化会导致方差巨大，完全不可训练**. 因此在工程实现中（如各类主流策略梯度算法），我们常对如下 token-level 的代理目标进行优化：
+$\mu$ 在这里代表推理引擎中的策略，它与训练引擎中的策略 $\pi$ 存在数值差异因此需要做重要性采样修正偏差. <mark>**$\frac{\pi_\theta (y | x)}{\mu_{\theta_{old}} (y|x)}$ 涉及长序列连乘，直接优化会导致方差巨大，完全不可训练**</mark>. 因此在工程实现中（如各类主流策略梯度算法），我们常对如下 token-level 的代理目标进行优化：
 
 $$\mathcal J^{token}(\theta) = \mathbb E_{x \sim \mathcal D, \, y \sim \mu_{\theta_{old}}} \left[ \sum_{t=1}^T \frac{\pi_\theta (y_t | x, y_{<t})}{\mu_{\theta_{old}} (y_t|x, y_{<t})} R(x, y)\right] \tag 4$$
 
@@ -42,7 +42,7 @@ $$\boxed{\nabla_\theta \mathcal J^{seq} \approx \nabla_\theta \mathcal J^{token}
 
 ### 训推差异与策略滞后
 
-自然地，读者很容易抛出一个疑问：在什么情况下，$|\delta_t| \ll 1$ 的近似条件会被破坏？为解决这个疑问，我们可以做如下改写：
+自然地，读者很容易抛出一个疑问：<mark>在什么情况下，$|\delta_t| \ll 1$ 的近似条件会被破坏？</mark>为解决这个疑问，我们可以做如下改写：
 
 $$\dfrac{\pi_\theta (y_t | x, y_{<t})}{\mu_{\theta_{old}}(y_t | x, y_{<t})} = \dfrac{\pi_{\theta_{old}} (y_t | x, y_{<t})}{\mu_{\theta_{old}}(y_t | x, y_{<t})} \cdot \dfrac{\pi_\theta (y_t | x, y_{<t})}{\pi_{\theta_{old}}(y_t | x, y_{<t})} \tag 8$$
 
@@ -68,7 +68,20 @@ $$\dfrac{\pi_\theta (y_t | x, y_{<t}, \color{blue}{e_t^{\pi_{old}}})}{\mu_{\thet
 
 $$\dfrac{\pi_\theta (y_t | x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}{\mu_{\theta_{old}}(y_t|x, y_{<t}, e_t^{\mu_{old}})} = \underbrace{\dfrac{\pi_{\theta_{old}} (y_t | x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}{\mu_{\theta_{old}}(y_t|x, y_{<t}, e_t^{\mu_{old}})}}_{\text {numerical differences} \, \downarrow} \cdot \underbrace{\dfrac{\pi_\theta (y_t | x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}{\pi_{\theta_{old}}(y_t|x, y_{<t}, \color{blue}{e_t^{\mu_{old}}})}}_{\text {policy staleness} \, \downarrow} \tag {11}$$
 
-值得注意的是，尽管路由重演机制缓和了 MoE 中被放大的训推差异与策略滞后问题，**它不可避免的在优化目标中引入了额外的偏差：每个 token $y_t$ 所对应的专家 $e^\pi_t$ 本应由模型自主决定，而该机制对其进行了人为干预**.
+值得注意的是，尽管路由重演机制缓和了 MoE 中被放大的训推差异与策略滞后问题，<mark>**它不可避免的在优化目标中引入了额外的偏差：每个 token $y_t$ 所对应的专家 $e^\pi_t$ 本应由模型自主决定，而该机制对其进行了人为干预**</mark>.
 
 ## 参考文献
 [[1] Stabilizing Reinforcement Learning with LLMs: Formulation and Practices](<https://arxiv.org/abs/2512.01374>)
+
+---
+
+## 引用本文
+
+```bibtex
+@misc{waylonblog2025,
+  author = {Waylon John},
+  title = {LLM 强化学习不稳定的原因：训推差异与策略陈旧},
+  year = {2025},
+  url = {https://waylon-john-777.github.io/my-blog/#/LLM%20强化学习不稳定的原因：训推差异与策略陈旧}
+}
+```

@@ -633,3 +633,16 @@ model = Model(rngs=nnx.Rngs(params=0, dropout=1))
 [[1] Manual parallelism with shard_map](https://docs.jax.dev/en/latest/notebooks/shard_map.html)
 
 [[2] Basic Guides: Randomness](https://flax.readthedocs.io/en/stable/guides/randomness.html)
+
+---
+
+## 引用本文
+
+```bibtex
+@misc{waylonblog2025,
+  author = {Waylon John},
+  title = {JAX 入门：函数变换、分布式计算与显式随机管理},
+  year = {2025},
+  url = {https://waylon-john-777.github.io/my-blog/#/JAX%20入门：函数变换、分布式计算与显式随机管理}
+}
+```

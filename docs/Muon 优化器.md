@@ -66,7 +66,7 @@ $$X = U \, \Phi^k(\Sigma) \, V^\top \tag 3$$
 
 这事实上来源于经验观察：SGD-momentum/Adam 对 Transformer 的 2D 参数的更新满足低秩特性，也即**更新几乎仅沿少数几个奇异方向**，这使得 $\sigma_i$ 较小的信号被淹没，网络在一个极度各向异性的子空间中振荡.
 
-直觉上而言，通过抹平奇异值幅度的差异（$O = U V^\top$），Muon 使优化在高维参数空间中更加各向同性和稳定.
+<mark>直觉上而言，通过抹平奇异值幅度的差异（$O = U V^\top$），Muon 使优化在高维参数空间中更加各向同性和稳定</mark>.
 
 ## 系数的确立 & 转置的作用
 ### 默认系数的由来
@@ -97,7 +97,7 @@ $$X = U \, \Phi^k(\Sigma) \, V^\top \tag 3$$
 1. 当 $\max (A, B)$ 较大，更新量过小，从而限制了模型的表示能力并导致次优性能；
 2. 当 $\max (A, B)$ 较小，更新量过大，这会导致训练的不稳定性；
 
-AdamW 常用以与 Muon 结合以更新如 RMSNorm, LM head 和 embedding 等非矩阵参数，为使超参数如学习率 $\eta$，权重衰减 $\lambda$ 在矩阵和非矩阵参数之间共享，KIMI 采用如下调整**将 MUON 的更新 RMS 匹配为与 AdamW 相似的 RMS**（经验观察 AdamW 的更新均方根值通常在 0.2 到 0.4 之间）：
+<mark>AdamW 常用以与 Muon 结合以更新如 RMSNorm, LM head 和 embedding 等非矩阵参数</mark>，为使超参数如学习率 $\eta$，权重衰减 $\lambda$ 在矩阵和非矩阵参数之间共享，KIMI 采用如下调整**将 MUON 的更新 RMS 匹配为与 AdamW 相似的 RMS**（经验观察 AdamW 的更新均方根值通常在 0.2 到 0.4 之间）：
 
 $$\mathbf W_t = \mathbf W_{t - 1} - \eta_t \left(0.2 \cdot \sqrt{\max(A, B)} \cdot \mathbf O_t + \lambda \mathbf W_{t - 1}\right) \tag 4$$
 
@@ -106,3 +106,16 @@ $$\mathbf W_t = \mathbf W_{t - 1} - \eta_t \left(0.2 \cdot \sqrt{\max(A, B)} \cd
 [[1] Muon: An optimizer for hidden layers in neural networks](<https://kellerjordan.github.io/posts/muon/>)
 
 [[2] MUON IS SCALABLE FOR LLM TRAINING](<https://arxiv.org/pdf/2502.16982>)
+
+---
+
+## 引用本文
+
+```bibtex
+@misc{waylonblog2025,
+  author = {Waylon John},
+  title = {Muon 优化器},
+  year = {2025},
+  url = {https://waylon-john-777.github.io/my-blog/#/Muon%20优化器}
+}
+```
