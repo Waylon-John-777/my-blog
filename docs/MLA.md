@@ -76,12 +76,12 @@ $$
 $$
 \begin{align}
 \mathbf u_t &= \sum_i W_i^O \mathbf o_{t, i} \\ 
-&= \sum_i W_i^O \sum_{j=1}^t \underbrace{\text{softmax}_j \left(\dfrac{\mathbf q_{t, i}^\top \mathbf k_{j, i}}{\sqrt {d_h}}\right)}_{\alpha_{t, j}^{(i)}} \mathbf v_{j, i} \\ 
+&= \sum_i W_i^O \sum_{j=1}^t \underbrace{\text{softmax}_j \left(\dfrac{\mathbf q_{t, i}^\top \mathbf k_{j, i}}{\sqrt {d_c}}\right)}_{\alpha_{t, j}^{(i)}} \mathbf v_{j, i} \\ 
 &= \sum_i \underbrace{W_i^O W_{U, i}^V}_{\tilde W_i^O}\sum_{j=1}^t \alpha_{t, j}^{(i)} \underbrace{W_D^{K, V} \mathbf h_j}_{\mathbf c_j^{K, V}} \tag {15}
 \end{align} 
 $$
 
-可见上投影阵 $W_U^K$ 和 $W_U^V$ 在实际计算中的确可以被以某种形式融入新矩阵 $\tilde W^Q$ 和 $\tilde W^O$ 的构建.
+可见上投影阵 $W_U^K$ 和 $W_U^V$ 在实际计算中的确可以被以某种形式融入新矩阵 $\tilde W^Q \in \mathbb R^{n_hd_c \times d}$ 和 $\tilde W^O \in \mathbb R^{d \times n_hd_c}$ 的构建. 从这个角度来看，<mark>**MLA 将多头的差异性从 KV Cache 转移到了投影矩阵 $\tilde W^Q, \tilde W^O$ 中，实现了缓存共享而计算仍保持多头**</mark>.
 
 ## RoPE 解耦
 
