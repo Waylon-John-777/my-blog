@@ -6,6 +6,7 @@
 
 ## 最新文章
 
+- [扩散模型系列（一）：从 Fokker-Plank 方程谈起](扩散模型系列（一）：从%20Fokker-Plank%20方程谈起.md)
 - [Multi-Head Latent Attention](MLA.md)
 - [Muon 优化器](Muon%20优化器.md)
 - [LLM 强化学习不稳定的原因：训推差异与策略陈旧](LLM%20强化学习不稳定的原因：训推差异与策略陈旧.md)
