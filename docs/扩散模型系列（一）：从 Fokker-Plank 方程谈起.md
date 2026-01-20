@@ -4,7 +4,16 @@
 
 ## 为什么会有这篇文章
 
-约莫在一年前我初学扩散模型的时候
+大约一年前初学扩散模型时，我对逆扩散过程感到困惑：<mark>这里的"逆"到底指的是什么</mark>？若按经典力学的意义去理解，所谓的去噪 [[1]](https://arxiv.org/abs/2006.11239) 不就是还原到原始图像，而非生成新的样本？DDPM 的原始论文通过构造变分下界进行优化，但这一角度难以触及问题的本质.
+
+一个自然的思路是从统计物理的视角出发，例如随机微分方程 [[2]](https://arxiv.org/abs/2011.13456). 前向过程的构建较为直接，但反向过程的推导在 [[2]](https://arxiv.org/abs/2011.13456) 中着墨不多，仅引用了一篇早期文献. 沿此路径深入理解需要补充伊藤积分的相关知识，这对非数学背景的读者而言存在一定门槛.
+
+因此，我尝试用所学的专业知识重新梳理反向过程的推导. 在这一框架下，所用到的工具仅限于普通的向量微积分. 本系列将呈现：**扩散模型中的"逆"，指的并非其它，正是分布函数意义上的逆变化**.
+
+<div align="center">
+  <img src="./figs/扩散模型系列（一）：从 Fokker-Plank 方程谈起/DDPM animation.gif" width="400"><br>
+  <b>Fig 1. 托卡马克单零点放电位形下的逆扩散过程</b>
+</div>
 
 ## Fokker-Plank 方程推导
 
@@ -33,4 +42,10 @@ $$\left(\dfrac{\partial f}{\partial t}\right)_c = - \dfrac{\partial}{\partial \m
 
 其中 $\mathbf A(\mathbf v) := \displaystyle \lim_{\Delta t \rightarrow 0} \dfrac{1}{\Delta t} \displaystyle \int \psi(\mathbf v, \Delta \mathbf v) \Delta \mathbf v \, \text d \Delta \mathbf v $，$\mathbf B(\mathbf v) := \displaystyle \lim_{\Delta t \rightarrow 0} \dfrac{1}{\Delta t} \displaystyle \int \psi(\mathbf v, \Delta \mathbf v) \Delta \mathbf v \Delta \mathbf v \, \text d \Delta \mathbf v $.
 
-## $\mathbf A(\mathbf v)$ 与 $\mathbf B(\mathbf v)$ 的物理意义
+## A(v) 与 B(v) 的物理意义
+
+## 参考资料
+
+[[1] Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
+
+[[2] Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456)
