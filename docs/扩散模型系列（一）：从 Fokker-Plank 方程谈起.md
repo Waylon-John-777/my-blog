@@ -12,19 +12,19 @@
 
 <div align="center">
   <img src="./figs/扩散模型系列（一）：从 Fokker-Plank 方程谈起/DDPM animation.gif" width="400"><br>
-  <b>Fig 1. 托卡马克单零点放电位形下的逆扩散过程</b>
+  <b>Fig 1. 托卡马克单零点放电位形下的逆扩散过程（摘自本人毕业论文）</b>
 </div>
 
 ## Fokker-Plank 方程推导
 
-分布函数随时间的变化包括两部分的贡献：
+分布函数随时间的变化包括两部分的贡献 [[3]]：
 
 1. 相空间中的输运；
 2. 粒子相互作用所引起的碰撞；
 
 $$\dfrac{\partial f}{\partial t} + \mathbf v \cdot \nabla f + \dfrac{\mathbf F}{m} \cdot \nabla_{\mathbf v} f = \left(\dfrac{\partial f}{\partial t}\right)_c \tag 1$$
 
-假设碰前速度 $\mathbf v - \Delta \mathbf v$，碰后速度 $\mathbf v$，记 $\psi \left(\mathbf v - \Delta \mathbf v, \Delta \mathbf v\right)$ 为该过程发生的概率密度（e.g. $\int \psi \left(\mathbf v - \Delta \mathbf v, \Delta \mathbf v\right) \text d \Delta \mathbf v= 1$），显然我们有：
+假设碰前速度 $\mathbf v - \Delta \mathbf v$，碰后速度 $\mathbf v$，记 $\psi \left(\mathbf v - \Delta \mathbf v, \Delta \mathbf v\right)$ 为该过程发生的概率密度（e.g. $\displaystyle \int \psi \left(\mathbf v - \Delta \mathbf v, \Delta \mathbf v\right) \text d \Delta \mathbf v= 1$），显然我们有：
 
 $$f(\mathbf r, \mathbf v, t) = \int  f(\mathbf r, \mathbf v - \Delta \mathbf v, t - \Delta t) \, \psi \left(\mathbf v - \Delta \mathbf v, \Delta \mathbf v\right) \text d \Delta \mathbf v \tag 2$$
 
@@ -44,8 +44,15 @@ $$\left(\dfrac{\partial f}{\partial t}\right)_c = - \dfrac{\partial}{\partial \m
 
 ## A(v) 与 B(v) 的物理意义
 
+假设有试探粒子在 $t = 0$ 时刻满足分布 $f(\mathbf v) = \delta (\mathbf v - \mathbf u_0)$，代入式 $(4)$ 两侧后对速度求一阶矩有：
+
+$$\dfrac{\partial \mathbf u}{\partial t}\mid_{\mathbf u = \mathbf u_0, \, t = 0} \;= \mathbf A(\mathbf u_0) \tag 5$$
+
+显然 $\mathbf A(\mathbf v) \propto - \dfrac{\mathbf v}{\tau}$，即 $\mathbf A(\mathbf v)$ 体现了粒子由于碰撞而产生的平均速度变化率.
 ## 参考资料
 
 [[1] Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 
 [[2] Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456)
+
+[[3] 中国科学技术大学：等离子体动理学课堂讲义]
