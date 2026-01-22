@@ -12,12 +12,12 @@
 
 <div align="center">
   <img src="./figs/扩散模型系列（一）：从 Fokker-Plank 方程谈起/DDPM animation.gif" width="400"><br>
-  <b>Fig 1. 托卡马克单零点放电位形下的逆扩散过程（摘自本人毕业论文）</b>
+  <b>Fig 1. 托卡马克单零点放电位形下的逆扩散过程（摘自毕业论文）</b>
 </div>
 
 ## Fokker-Plank 方程推导
 
-分布函数随时间的变化包括两部分的贡献 [[3]]：
+分布函数随时间的变化包括两部分的贡献 [[3]]()：
 
 1. 相空间中的输运；
 2. 粒子相互作用所引起的碰撞；
@@ -55,4 +55,4 @@ $$\dfrac{\partial \mathbf u}{\partial t}\mid_{\mathbf u = \mathbf u_0, \, t = 0}
 
 [[2] Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456)
 
-[[3] 中国科学技术大学：等离子体动理学课堂讲义]
+[[3] 中国科学技术大学：等离子体动理学课堂讲义]()
