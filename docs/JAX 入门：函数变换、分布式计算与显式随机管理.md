@@ -9,7 +9,7 @@
 > …“Throughout all these revolutions that came, you always see PyTorch there,” he said. “And there are, of course, others like JAX and so on —— they’re very strong.”…
 
 <div align="center">
-  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX1.png"><br>
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX1.png" width="600"><br>
   <b>Fig 1. Luca Antiga 是 PyTorch 原始论文的 21 位作者之一</b>
 </div>
 
@@ -18,7 +18,7 @@
 > …The “single controller” programming model of JAX and Pathways allow a single Python process orchestrate the entire training run, dramatically simplifying the development workflow…
 
 <div align="center">
-  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX2.png"><br>
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX2.png" width="600"><br>
   <b>Fig 2. 2025 年 11 月 19 日发布的 Gemini 3 在主流评测集的分数实现了近乎全面（甚至是断崖式的）领先</b>
 </div>
 
@@ -208,7 +208,7 @@ sharded_arr = jax.device_put(arr, NamedSharding(mesh, P("x", "y")))
 jax.debug.visualize_array_sharding(sharded_arr)
 ```
 <div align="center">
-  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX4.png"><br>
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX4.png" width="400"><br>
   <b>Fig 4. 检查张量在各设备上的切分情况</b>
 </div>
 
@@ -276,7 +276,7 @@ True
 <mark>**将设备视作网格并建立张量维度到设备轴的映射是 JAX 分布式计算的核心特色之一**</mark>. 下图展示了在 LLM 训练中常见的并行训练方式的设备 & 逻辑 mesh 的设置：
 
 <div align="center">
-  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX5.png"><br>
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX5.png" width="600"><br>
   <b>Fig 5. 各并行策略下模型权重与数据在不同卡上的切分</b>
 </div>
 
@@ -284,7 +284,7 @@ True
 JAX 的通信可通过 ```jax.lax.psum```, ```jax.lax.all_to_all``` 等 API 实现. 在 GPU 设备上，这些集合通信操作经过编译后最终会调用 NCCL.
 
 <div align="center">
-  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX6.png"><br>
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX6.png" width="600"><br>
   <b>Fig 6. 常见通信操作图解</b>
 </div>
 
@@ -293,7 +293,7 @@ JAX 的通信可通过 ```jax.lax.psum```, ```jax.lax.all_to_all``` 等 API 实�
 另一在 JAX 中常使用的通信为 ```jax.lax.ppermute```，该操作需要指定设备轴及一组源索引、目标索引对. 这些索引代表局部数据沿该设备轴的坐标. ```jax.lax.ppermute``` 会将参数从每个源发送到对应的目的地. 
 
 <div align="center">
-  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX7.png"><br>
+  <img src="./figs/JAX 入门：函数变换、分布式计算与显式随机管理/JAX7.png" width="600"><br>
   <b>Fig 7. 通过 permute 操作实现 reduce-scatter</b>
 </div>
 

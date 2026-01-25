@@ -54,8 +54,8 @@ $$X = U \, \Phi^k(\Sigma) \, V^\top \tag 3$$
 **为避免发散，$X$ 的奇异值需落在区间 $[0, 1]$ 内**，这已经通过作归一化 $X = \dfrac{M}{\|M\|_F}$ 实现（注意到 $\|M\|_F = \sqrt{\sum {\sigma_i^M}^2}$）. 显然迭代的最终效果依赖于超参 $a, b, c$ 的选取，让我们首先看看 $\Phi^k$ 在 $a = 2, b = -1.5, c = 0.5$ 的情况：
 
 <div align="center">
-  <img src="./figs/Muon 优化器/muon1.png"><br>
-  <b>Fig1. 迭代数 k 增加时，NS 收敛于 1</b>
+  <img src="./figs/Muon 优化器/muon1.png" width="400"><br>
+  <b>Fig 1. 迭代数 k 增加时，NS 收敛于 1</b>
 </div>
 
 不难发现在该超参下（并不唯一），NewtonSchulz 迭代可实现近似正交化的高效求解. 
@@ -80,8 +80,8 @@ $$X = U \, \Phi^k(\Sigma) \, V^\top \tag 3$$
 经验观察表明 $\epsilon$ 可高达 0.3. 下图绘制了迭代次数为 5 时 [[1]](<https://kellerjordan.github.io/posts/muon/>) 中默认参数设置下的收敛情况：
 
 <div align="center">
-  <img src="./figs/Muon 优化器/muon2.png"><br>
-  <b>Fig2. 默认参数设置下的 NS 迭代</b>
+  <img src="./figs/Muon 优化器/muon2.png" width="400"><br>
+  <b>Fig 2. 默认参数设置下的 NS 迭代</b>
 </div>
 
 ### 计算量分析
