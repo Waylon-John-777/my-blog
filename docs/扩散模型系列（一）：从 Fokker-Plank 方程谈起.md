@@ -49,3 +49,16 @@ $$\left(\dfrac{\partial f}{\partial t}\right)_c = \underbrace{- \dfrac{\partial}
 [[2] Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456)
 
 [[3] 等离子体动理学课堂讲义]()
+
+---
+
+## 引用本文
+
+```bibtex
+@misc{waylonblog2026,
+  author = {Waylon John},
+  title = {扩散模型系列（一）：从 Fokker-Plank 方程谈起},
+  year = {2026},
+  url = {https://waylon-john-777.github.io/my-blog/#/扩散模型系列（一）：从%20Fokker-Plank%20方程谈起}
+}
+```
