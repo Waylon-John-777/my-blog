@@ -6,6 +6,7 @@
 
 ## 最新文章
 
+- [扩散模型系列（二）：前向与反向随机微分方程](扩散模型系列（二）：前向与反向随机微分方程.md)
 - [扩散模型系列（一）：从 Fokker-Plank 方程谈起](扩散模型系列（一）：从%20Fokker-Plank%20方程谈起.md)
 - [Multi-Head Latent Attention](MLA.md)
 - [Muon 优化器](Muon%20优化器.md)
