@@ -23,7 +23,7 @@
 给定历史观测序列 $o$，包括多相机图像 $o_{\text{image}}$ 和自车运动历史 $o_{\text{egomotion}}$，AR1 被训练执行两项任务：生成推理，并预测自车未来轨迹 $\tau = \{(x^i, y^i, \theta^i)\}_{i=1}^{64}$. 
 
 <div align="center">
-  <img src="./figs/Nvidia Alpamayo-R1/Backbone.png" width=“400"><br>
+  <img src="./figs/Nvidia Alpamayo-R1/Backbone.png" width="400"><br>
   <b>Fig 1. Alpamayo-R1 架构一览</b>
 </div>
 
@@ -74,5 +74,34 @@ AR1 对轨迹同时维护离散与连续两套表征. 序列 $u = \{(a^i, \kappa
 3. 量化后的 token 为车辆动力学学习提供了强监督信号，而 flow-matching expert 则负责保证输出的连续性与多峰性；      
 4. flow-matching 解码仅需约 10 步去噪，远快于自回归逐一采样 128 个 token，从而满足实时性要求；
 
-## 
+## 强化学习
 
+### 优化算法
+
+AR1 使用 GRPO 更新模型参数，其目标函数为：
+
+$$L_{\text {GRPO}}(\theta) = -\mathbb E_{\tau_i \sim \pi_\theta} \left[\dfrac {\exp (\beta A_i)}{\displaystyle \sum_j \exp(\beta A_j)} \log \pi_\theta (\tau_i) - \lambda_{\text {KL}} D_{\text {KL}} \left[\pi_\theta (\tau_i) \| \pi_{\text {ref}} (\tau_i)\right]\right], \quad A_i = r_i - \bar r \tag 2$$
+
+该式存在两个关键设计：
+
+1. 执行严格的 on policy 采样，故无需 clip 新旧策略比；
+2. 不使用标准差做缩放，而是利用 softmax 光滑的优势函数直接作为对数概率的加权因子. $\beta$ 控制权重分布的尖锐程度，高 $\beta$ 让最优 rollout 获得更集中的关注，低 $\beta$ 保持更均匀的更新；
+
+### 奖励建模
+
+AR1 的奖励函数由三个信号构成，它们不是并列关系，而是一条层次因果链：
+
+$$r = r_{\text{reason}} + r_{\text{consistency}} + r_{\text{traj}} \tag 3$$
+
+第一层奖励 $r_{\text{reason}}$ 针对推理质量本身. 评判者是一个大型推理模型（如 DeepSeek-R1），输入包含：历史窗口最后一帧多相机视觉观测、来自数据集的 ground-truth reasoning trace、以及当前策略生成的预测 trace. LRM 根据两个维度来评判 rollout 推理质量好坏：
+
+1. 纵向/横向驾驶意图（见论文 table 1）是否与 GT 匹配；
+2. 历史观测中是否正确识别并引用了驱动该决策的 critical components（见论文 table 2）；
+
+第二层奖励 $r_{\text{consistency}}$ 量化模型言行一致的程度. 论文描述的计算流程是：预测轨迹 → meta-actions，reasoning trace → 解析驾驶意图，然后 rule-based 匹配. 但论文未说明两侧如何对齐到同一表示空间——Table 5 的 meta-actions 是帧级运动学原语，Table 1 的驾驶决策是片段级语义，二者之间存在层次 gap.
+
+第三层奖励 $r_{\text{traj}}$ 旨在确保实际连续轨迹贴合专家演示，并通过惩罚碰撞与急刹以确保安全性与舒适性：
+
+$$r_{\text{traj}} = \lambda_{L_2} \|x_{\text{pred}} - x_{\text{expert}}\|^2_2 + \lambda_{\text{coll}} \mathbb I [\text{collision}(x_{\text{pred}})] + \lambda_{\text{jerk}} J(x_{\text{pred}}) \tag 4$$
+
+### 数据筛选
