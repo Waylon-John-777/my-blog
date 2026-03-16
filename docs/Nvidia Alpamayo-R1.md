@@ -105,3 +105,5 @@ $$r = r_{\text{reason}} + r_{\text{consistency}} + r_{\text{traj}} \tag 3$$
 $$r_{\text{traj}} = \lambda_{L_2} \|x_{\text{pred}} - x_{\text{expert}}\|^2_2 + \lambda_{\text{coll}} \mathbb I [\text{collision}(x_{\text{pred}})] + \lambda_{\text{jerk}} J(x_{\text{pred}}) \tag 4$$
 
 ### 数据筛选
+
+与 SFT 直接在标注数据上计算 loss 不同，RL 的 on-policy 采样和 reward 调用会大幅放大计算成本. 论文因此提出用自身模型概率计算与外部模型显式奖励的分歧度来筛选训练数据，以最小的计算代价获得最大的对齐收益. 论文将这批高分歧样本与相近比例的随机采样数据混合，构成最终的 RL 训练集：前者保证对齐效率，后者维持分布多样性.
