@@ -98,7 +98,7 @@ $$r = r_{\text{reason}} + r_{\text{consistency}} + r_{\text{traj}} \tag 3$$
 1. 纵向/横向驾驶意图（见论文 table 1）是否与 GT 匹配；
 2. 历史观测中是否正确识别并引用了驱动该决策的 critical components（见论文 table 2）；
 
-第二层奖励 $r_{\text{consistency}}$ 量化模型言行一致的程度. 论文描述的计算流程是：预测轨迹 → meta-actions，reasoning trace → 解析驾驶意图，然后 rule-based 匹配. 但论文未说明两侧如何对齐到同一表示空间——Table 5 的 meta-actions 是帧级运动学原语，Table 1 的驾驶决策是片段级语义，二者之间存在层次 gap.
+第二层奖励 $r_{\text{consistency}}$ 量化模型言行一致的程度. 具体流程是：将预测轨迹转化为 meta-actions，同时从 reasoning trace 解析出驾驶意图，在纵向与横向两个轴上进行 rule-based 匹配. 该奖励为二值信号——仅当两轴均一致时 $r_{\text{consistency}} = 1$，否则为 $0$（包括 reasoning 无法被解析为有效驾驶决策的情况）. 不过论文未详述如何跨越 Table 5 帧级运动学原语与 Table 1 片段级语义决策之间的抽象层次差异.
 
 第三层奖励 $r_{\text{traj}}$ 旨在确保实际连续轨迹贴合专家演示，并通过惩罚碰撞与急刹以确保安全性与舒适性：
 
